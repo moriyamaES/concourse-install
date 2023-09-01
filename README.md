@@ -2435,7 +2435,7 @@ docker-compose は 2023-08-15現在の最新のため、このままとする
         version 7.10.0 already matches; skipping
         ```
 
-- 更に以下のコマンドを実行すると
+- 更に以下のコマンドを実行すると(★２回目以降のログインはここから実行)
 
     ```
     # fly --target tutorial login --concourse-url http://localhost:8080
@@ -2488,3 +2488,125 @@ docker-compose は 2023-08-15現在の最新のため、このままとする
     ```
     fly -t tutorial execute -c task_hello_world.yml
     ```
+
+###  Task inputs について
+
+- 以下のサイトを参考に実施
+
+    https://concoursetutorial-ja.site.lkj.io/basics/task-inputs
+
+
+### Task スクリプトを別ファイルとして指定する
+
+- 以下のサイトを参考に実施
+
+    https://concoursetutorial-ja.site.lkj.io/basics/task-scripts
+
+
+### ベーシックなパイプライン
+
+- 以下のサイトを参考に実施
+
+    https://concoursetutorial-ja.site.lkj.io/basics/basic-pipeline
+
+
+- パイプラインを作成する
+
+    ```
+    # cd ../basic-pipeline
+    ```
+
+    ```
+    # fly -t tutorial set-pipeline -c pipeline.yml -p hello-world
+    ```
+
+- パイラインを作成する
+
+
+    ```
+    # fly -t tutorial unpause-pipeline -p hello-world
+    ```
+
+    ```
+    # fly -t tutorial unpause-job --job hello-world/job-hello-world
+    ```
+
+### Resource について
+
+- 以下のサイトを参考に実施
+
+    https://concoursetutorial-ja.site.lkj.io/basics/pipeline-resources
+
+
+### Job の出力結果をターミナルで確認する
+
+- 以下のサイトを参考に実施
+
+    https://concoursetutorial-ja.site.lkj.io/basics/watch-job-output
+
+
+### Job を起動する
+
+- 以下のサイトを参考に実施
+
+    https://concoursetutorial-ja.site.lkj.io/basics/trigger-jobs
+
+
+- 以下のコマンドで、Pipeline hello-world の job-hello-world をもう1度起動することができます:
+
+    ```
+    # fly -t tutorial trigger-job -j hello-world/job-hello-world
+    ```
+
+- Job が実行されている間（そして完了した後）、ターミナルで fly watch コマンドを使ってログの出力結果を見ることができます:
+
+    ```
+    # fly -t tutorial watch -j hello-world/job-hello-world
+    ```
+
+- あるいは、2つのコマンドを組み合わせることもできます - Jobを起動し、trigger-job -w フラグで出力を監視します:
+
+    ```
+    # fly -t tutorial trigger-job -j hello-world/job-hello-world -w
+    ```
+
+### Resource を使って Job を起動する
+
+- 以下のサイトを参考に実施
+
+    https://concoursetutorial-ja.site.lkj.io/basics/triggers
+
+### パイプラインを削除する
+
+- 以下のサイトを参考に実施
+
+    https://concoursetutorial-ja.site.lkj.io/basics/destroy-pipelines
+
+
+- 以下のコマンドを実行する
+
+    ```
+    # fly -t tutorial destroy-pipeline -p hello-world
+    ```
+
+### Task で Resource から読み込んだファイルを利用する
+
+- 以下のサイトを参考に実施
+
+    https://concoursetutorial-ja.site.lkj.io/basics/job-inputs
+
+
+
+### 成功した Task の outputs を別の Task の inputs にする
+
+- 以下のサイトを参考に実施
+
+    https://concoursetutorial-ja.site.lkj.io/basics/task-outputs-to-inputs
+
+
+### ビルドの成果物をアップロードする
+
+- 以下のサイトを参考に実施
+
+    https://concoursetutorial-ja.site.lkj.io/basics/publishing-outputs
+
