@@ -2610,3 +2610,359 @@ docker-compose は 2023-08-15現在の最新のため、このままとする
 
     https://concoursetutorial-ja.site.lkj.io/basics/publishing-outputs
 
+
+- 以下のコマンドを実行
+
+    ```
+    # cd ~/concourse-tutorial/tutorials/basic/publishing-outputs/
+    ```
+    
+    ~~cp pipeline-missing-credentials.yml pipeline.yml~~
+
+    ```
+    # fly -t tutorial set-pipeline -p publishing-outputs -c pipeline.yml
+    ```
+    
+    ```
+    # fly -t tutorial unpause-pipeline -p publishing-outputs
+    ```
+
+- オレンジにならないが、ハンズオンをこのまま実施
+
+    ![オレンジにならない](./imgs/オレンジにならない.png)
+
+
+~~    # fly -t tutorial unpause-job -j publishing-outputs/job-bump-date~~
+
+~~- パイプラインを削除する~~
+
+~~    # fly -t tutorial destroy-pipeline -p publishing-outputs~~
+
+- 発生したエラー
+
+    ```
+    # fly -t tutorial check-resource -r publishing-outputs/resource-gist
+    checking publishing-outputs/resource-gist in build 1209
+    initializing check: resource-gist
+    selected worker: 971dfbb64a5a
+    Error loading key "/tmp/git-resource-private-key": error in libcrypto
+    failed
+    ```
+
+    - 対策 → `private_key: |`の上に空行を入れた（理由は不明）
+
+- 発生したエラー
+
+    ```
+    # fly -t tutorial check-resource -r publishing-outputs/resource-gist
+    checking publishing-outputs/resource-gist in build 1274
+    initializing check: resource-gist
+    selected worker: 971dfbb64a5a
+    Identity added: /tmp/git-resource-private-key (/tmp/git-resource-private-key)
+    Cloning into '/tmp/git-resource-repo-cache'...
+    warning: Could not find remote branch master to clone.
+    fatal: Remote branch master not found in upstream origin
+    failed    
+    ```
+
+    - 対策 → `branch: master` をコメントアウトした（`gist`` にはブランチが存在しないため、そのようにした）
+
+- 発生したエラー
+
+    ```
+    # fly -t tutorial trigger-job -j publishing-outputs/job-bump-date -w
+    started publishing-outputs/job-bump-date #2
+
+    selected worker: 971dfbb64a5a
+    INFO: found existing resource cache
+
+    selected worker: 971dfbb64a5a
+    Identity added: /tmp/git-resource-private-key (/tmp/git-resource-private-key)
+    Cloning into '/tmp/build/get'...
+    19482e7 
+    initializing
+    initializing check: image
+    selected worker: 971dfbb64a5a
+    failed to fetch digest for image 'starkandwayne/concourse:latest': 401 Unauthorized
+    does the image exist?
+    image check failed
+    errored
+    ```
+
+    - 対策 → コンテナイメージを`bitnami/concourse`に変更した。（`starkandwayne/concourse`がDockerHubに存在しないため）
+
+
+- 以下のコマンドを実行
+
+- パイプラインを削除する
+
+    ```
+    # fly -t tutorial destroy-pipeline -p publishing-outputs
+    ```
+
+- パイプラインを作成
+
+    ```
+    # fly -t tutorial set-pipeline -p publishing-outputs -c pipeline.yml
+    ```
+
+- パイプラインのリソースをチェック
+
+    ```
+    # fly -t tutorial check-resource -r publishing-outputs/resource-gist
+    ```
+
+- パイプラインを有効化
+- ※この手順は、オリジナルにはない
+
+    ```
+    # fly -t tutorial unpause-pipeline -p publishing-outputs
+    ```
+
+- パイプラインを実行し、動作を監視
+
+    ```
+    # fly -t tutorial trigger-job -j publishing-outputs/job-bump-date -w
+    ```
+
+
+- 発生したエラー
+ 
+    ```
+    # fly -t tutorial trigger-job -j publishing-outputs/job-bump-date -w
+    started publishing-outputs/job-bump-date #1
+
+    selected worker: 971dfbb64a5a
+    INFO: found existing resource cache
+
+    selected worker: 971dfbb64a5a
+    Identity added: /tmp/git-resource-private-key (/tmp/git-resource-private-key)
+    Cloning into '/tmp/build/get'...
+    19482e7 
+    initializing
+    initializing check: image
+    selected worker: 971dfbb64a5a
+    selected worker: 971dfbb64a5a
+    waiting for docker to come up...
+    Pulling bitnami/concourse@sha256:d014b25bed090db1b4410d233047916f09c78e7c7e2d24e46ae2f140578e3ef4...
+    docker.io/bitnami/concourse@sha256:d014b25bed090db1b4410d233047916f09c78e7c7e2d24e46ae2f140578e3ef4: Pulling from bitnami/concourse
+    9d4a76cdb52b: Pulling fs layer
+    9d4a76cdb52b: Verifying Checksum
+    9d4a76cdb52b: Download complete
+    9d4a76cdb52b: Pull complete
+    Digest: sha256:d014b25bed090db1b4410d233047916f09c78e7c7e2d24e46ae2f140578e3ef4
+    Status: Downloaded newer image for bitnami/concourse@sha256:d014b25bed090db1b4410d233047916f09c78e7c7e2d24e46ae2f140578e3ef4
+    docker.io/bitnami/concourse@sha256:d014b25bed090db1b4410d233047916f09c78e7c7e2d24e46ae2f140578e3ef4
+
+    Successfully pulled bitnami/concourse@sha256:d014b25bed090db1b4410d233047916f09c78e7c7e2d24e46ae2f140578e3ef4.
+
+    selected worker: 971dfbb64a5a
+    running resource-tutorial/tutorials/basic/publishing-outputs/bump-timestamp-file.sh
+    + git clone resource-gist updated-gist
+    resource-tutorial/tutorials/basic/publishing-outputs/bump-timestamp-file.sh: 6: git: not found
+    failed
+    ```
+    - 原因（コンテナイメージを`bitnami/concourse`に`git`がイントールされていない？）
+
+    - 対策 → `git`　がインストールされているイメージを使用すればい？
+    - 以下のサイト
+        https://blog.ik.am/entries/380
+    - より、コンテナイメージ `getourneau/alpine-bash-git`は、`bash`と`git`をインストール済の模様
+
+    - よって、使用するコンテナを`getourneau/alpine-bash-git`に変える
+
+
+- 以下のコマンドを実行
+
+- パイプラインを削除する
+
+    ```
+    # fly -t tutorial destroy-pipeline -p publishing-outputs
+    ```
+
+- パイプラインを作成
+
+    ```
+    # fly -t tutorial set-pipeline -p publishing-outputs -c pipeline.yml
+    ```
+
+- パイプラインのリソースをチェック
+
+    ```
+    # fly -t tutorial check-resource -r publishing-outputs/resource-gist
+    ```
+
+- パイプラインを有効化
+- ※この手順は、オリジナルにはない
+
+    ```
+    # fly -t tutorial unpause-pipeline -p publishing-outputs
+    ```
+
+- パイプラインを実行し、動作を監視
+
+    ```
+    # fly -t tutorial trigger-job -j publishing-outputs/job-bump-date -w
+    ```
+
+- 発生したエラー
+
+    ```
+    # fly -t tutorial trigger-job -j publishing-outputs/job-bump-date -w
+    started publishing-outputs/job-bump-date #1
+
+    selected worker: 971dfbb64a5a
+    INFO: found existing resource cache
+
+    selected worker: 971dfbb64a5a
+    Identity added: /tmp/git-resource-private-key (/tmp/git-resource-private-key)
+    Cloning into '/tmp/build/get'...
+    19482e7 
+    initializing
+    initializing check: image
+    selected worker: 971dfbb64a5a
+    selected worker: 971dfbb64a5a
+    waiting for docker to come up...
+    Pulling getourneau/alpine-bash-git@sha256:246ebea4839401a027da43e406a0ceaf0f763997a516cf85c344425eb913ffe7...
+    docker.io/getourneau/alpine-bash-git@sha256:246ebea4839401a027da43e406a0ceaf0f763997a516cf85c344425eb913ffe7: Pulling from getourneau/alpine-bash-git
+    4fe2ade4980c: Pulling fs layer
+    03c196859ec8: Pulling fs layer
+    720d2de11875: Pulling fs layer
+    4fe2ade4980c: Verifying Checksum
+    4fe2ade4980c: Download complete
+    03c196859ec8: Verifying Checksum
+    03c196859ec8: Download complete
+    4fe2ade4980c: Pull complete
+    03c196859ec8: Pull complete
+    720d2de11875: Verifying Checksum
+    720d2de11875: Download complete
+    720d2de11875: Pull complete
+    Digest: sha256:246ebea4839401a027da43e406a0ceaf0f763997a516cf85c344425eb913ffe7
+    Status: Downloaded newer image for getourneau/alpine-bash-git@sha256:246ebea4839401a027da43e406a0ceaf0f763997a516cf85c344425eb913ffe7
+    docker.io/getourneau/alpine-bash-git@sha256:246ebea4839401a027da43e406a0ceaf0f763997a516cf85c344425eb913ffe7
+
+    Successfully pulled getourneau/alpine-bash-git@sha256:246ebea4839401a027da43e406a0ceaf0f763997a516cf85c344425eb913ffe7.
+
+    selected worker: 971dfbb64a5a
+    running resource-tutorial/tutorials/basic/publishing-outputs/bump-timestamp-file.sh
+    + git clone resource-gist updated-gist
+    Cloning into 'updated-gist'...
+    done.
+    + cd updated-gist
+    + date
+    + echo Fri Sep 1 13:19:28 UTC 2023
+    + git config --global user.email nobody@concourse-ci.org
+    + git config --global user.name Concourse
+    + git add .
+    + git commit -m 'Bumped date'
+    [main 88cf34b] Bumped date
+    1 file changed, 1 insertion(+), 1 deletion(-)
+    selected worker: 971dfbb64a5a
+    Identity added: /tmp/git-resource-private-key (/tmp/git-resource-private-key)
+    invalid payload (missing branch)
+    failed
+    ```
+
+- 対策 `pipeline.yml`を以下のように変更（`master`が無いなら`main`？）
+
+    ```
+    source:
+    # branch: master
+    branch: main
+    uri: git@gist.github.com:5e40d8df48fa30baf9abee4b35a2241a.git
+    ```
+
+- 以下のコマンドを実行
+
+- パイプラインを削除する
+
+    ```
+    # fly -t tutorial destroy-pipeline -p publishing-outputs
+    ```
+
+- パイプラインを作成
+
+    ```
+    # fly -t tutorial set-pipeline -p publishing-outputs -c pipeline.yml
+    ```
+
+- パイプラインのリソースをチェック
+
+    ```
+    # fly -t tutorial check-resource -r publishing-outputs/resource-gist
+    ```
+
+- パイプラインを有効化
+- ※この手順は、オリジナルにはない
+
+    ```
+    # fly -t tutorial unpause-pipeline -p publishing-outputs
+    ```
+
+- パイプラインを実行し、動作を監視
+
+    ```
+    # fly -t tutorial trigger-job -j publishing-outputs/job-bump-date -w
+    ```
+
+- 正常動作した！！
+
+    ```
+   # fly -t tutorial trigger-job -j publishing-outputs/job-bump-date -w
+    started publishing-outputs/job-bump-date #1
+
+    selected worker: 971dfbb64a5a
+    INFO: found existing resource cache
+
+    selected worker: 971dfbb64a5a
+    Identity added: /tmp/git-resource-private-key (/tmp/git-resource-private-key)
+    Cloning into '/tmp/build/get'...
+    19482e7 
+    initializing
+    initializing check: image
+    selected worker: 971dfbb64a5a
+    selected worker: 971dfbb64a5a
+    waiting for docker to come up...
+    Pulling getourneau/alpine-bash-git@sha256:246ebea4839401a027da43e406a0ceaf0f763997a516cf85c344425eb913ffe7...
+    docker.io/getourneau/alpine-bash-git@sha256:246ebea4839401a027da43e406a0ceaf0f763997a516cf85c344425eb913ffe7: Pulling from getourneau/alpine-bash-git
+    4fe2ade4980c: Pulling fs layer
+    03c196859ec8: Pulling fs layer
+    720d2de11875: Pulling fs layer
+    4fe2ade4980c: Verifying Checksum
+    4fe2ade4980c: Download complete
+    03c196859ec8: Verifying Checksum
+    03c196859ec8: Download complete
+    4fe2ade4980c: Pull complete
+    03c196859ec8: Pull complete
+    720d2de11875: Download complete
+    720d2de11875: Pull complete
+    Digest: sha256:246ebea4839401a027da43e406a0ceaf0f763997a516cf85c344425eb913ffe7
+    Status: Downloaded newer image for getourneau/alpine-bash-git@sha256:246ebea4839401a027da43e406a0ceaf0f763997a516cf85c344425eb913ffe7
+    docker.io/getourneau/alpine-bash-git@sha256:246ebea4839401a027da43e406a0ceaf0f763997a516cf85c344425eb913ffe7
+
+    Successfully pulled getourneau/alpine-bash-git@sha256:246ebea4839401a027da43e406a0ceaf0f763997a516cf85c344425eb913ffe7.
+
+    selected worker: 971dfbb64a5a
+    running resource-tutorial/tutorials/basic/publishing-outputs/bump-timestamp-file.sh
+    + git clone resource-gist updated-gist
+    Cloning into 'updated-gist'...
+    done.
+    + cd updated-gist
+    + date
+    + echo Fri Sep 1 13:41:00 UTC 2023
+    + git config --global user.email nobody@concourse-ci.org
+    + git config --global user.name Concourse
+    + git add .
+    + git commit -m 'Bumped date'
+    [main e1ccccf] Bumped date
+    1 file changed, 1 insertion(+), 1 deletion(-)
+    selected worker: 971dfbb64a5a
+    Identity added: /tmp/git-resource-private-key (/tmp/git-resource-private-key)
+    To gist.github.com:5e40d8df48fa30baf9abee4b35a2241a.git
+    19482e7..e1ccccf  HEAD -> main
+    selected worker: 971dfbb64a5a
+    Identity added: /tmp/git-resource-private-key (/tmp/git-resource-private-key)
+    Cloning into '/tmp/build/get'...
+    e1ccccf Bumped date
+    succeeded 
+    ```
