@@ -2435,7 +2435,7 @@ docker-compose は 2023-08-15現在の最新のため、このままとする
         version 7.10.0 already matches; skipping
         ```
 
-- 更に以下のコマンドを実行すると(★２回目以降のログインはここから実行)
+- 更に以下のコマンドを実行する（Concourse CI のWebUIへのログイン）(★２回目以降のログインはここから実行)
 
     ```
     # fly --target tutorial login --concourse-url http://localhost:8080
@@ -2610,6 +2610,7 @@ docker-compose は 2023-08-15現在の最新のため、このままとする
 
     https://concoursetutorial-ja.site.lkj.io/basics/publishing-outputs
 
+- 「ビルドの成果物をアップロードす」は`pipeline.yml`を以下のように修正したないと、成功しなかった
 
 - 以下のコマンドを実行
 
@@ -3041,3 +3042,688 @@ docker-compose は 2023-08-15現在の最新のため、このままとする
             params:
             repository: updated-gist
     ```
+
+### 申送り事項
+
+- `starkandwayne/concourse` はDockerHUBに無いが、以下のサイトで作成する模様
+　　
+    https://github.com/Qarik-Group/dockerfiles/tree/master/concourse-kubernetes/latest
+
+    https://github.com/Qarik-Group/dockerfiles
+
+    https://concoursetutorial-ja.site.lkj.io/basics/publishing-outputs
+
+- 今後、Docker Images `starkandwayne/concourse`  を作成し、再チャレンジしてみる
+
+### パラメータを利用する
+
+- 以下のサイトを参考に実施
+
+    https://concoursetutorial-ja.site.lkj.io/basics/parameters
+
+
+- コマンドを実行する（Concourse CI のWebUIへのログイン）
+
+    ```
+    # fly --target tutorial login --concourse-url http://localhost:8080
+    ```
+
+    - 操作
+    - `http://localhost:8080/login?fly_port=43269` でホストOSのブラウザにアクセスし、表示されたtokenを貼り付ける
+    - ユーザID: `test`、パスワード: `test` とする
+    - 上記操作をすると、Concourse CI のWeb UIにログインできる
+
+        ```
+        logging in to team 'main'
+
+        navigate to the following URL in your browser:
+
+        http://localhost:8080/login?fly_port=43269
+
+        or enter token manually (input hidden): 
+        target saved
+        ```
+
+### 成果物アップロード時のパラメータも設定する
+
+- 以下のサイトを参考に実施
+
+    https://concoursetutorial-ja.site.lkj.io/basics/parameters#_3
+
+- 以下のコマンド実行
+
+    ```
+    # pwd
+    /root/concourse-tutorial/tutorials/basic/parameters
+    ```
+
+    ```
+    # cd ../publishing-outputs
+    ```
+- `pipeline-parameters.yml`を以下のように作成
+
+    ```
+    # cat pipeline-parameters.yml 
+    ---
+    resources:
+    - name: resource-tutorial
+        type: git
+        source:
+        uri: https://github.com/starkandwayne/concourse-tutorial.git
+        branch: develop
+    - name: resource-gist
+        type: git
+        source:
+        branch: master
+        # branch: master
+        uri: ((publishing-outputs-gist-uri))
+        private_key: ((publishing-outputs-private-key))
+
+    jobs:
+    - name: job-bump-date
+        serial: true
+        plan:
+        - get: resource-tutorial
+        - get: resource-gist
+        - task: bump-timestamp-file
+            config:
+            platform: linux
+            image_resource:
+                type: docker-image
+                # source: {repository: starkandwayne/concourse}
+                source: {repository: getourneau/alpine-bash-git}
+
+            inputs:
+                - name: resource-tutorial
+                - name: resource-gist
+            outputs:
+                - name: updated-gist
+            run:
+                path: resource-tutorial/tutorials/basic/publishing-outputs/bump-timestamp-file.sh
+        - put: resource-gist
+            params:
+            repository: updated-gist
+    ```
+
+- `credentials.yml`を以下のように作成
+
+    ```
+    # cat credentials.yml 
+    publishing-outputs-gist-urii: git@gist.github.com:5e40d8df48fa30baf9abee4b35a2241a.git
+    publishing-outputs-private-key: |
+        -----BEGIN RSA PRIVATE KEY-----
+        MIIEowIBAAKCAQEAp/Tcj0IhF9PG27xq6dH4G72Nqns0KjaFnBABLEZty8DtFiaS
+        oESMZgrsrEJe36l1kaE9i/3UWKYrU5LZsDvn8DVc4Y5U0IE/QcmsplH5G0zSA0VJ
+        VRLB4higtJV4JPXKyjS1MBG5pLAD7pUbQ+jBj3a6icsHEuSGAfssY2lpSj8UOUwd
+        fmnPaaXmyY3x1K1KuaggQ8mLOJNPAJ4x2jar+bap0URlggbu2kFQ4/XakDZVCRxT
+        JDybRM37RwrSqLYspnOsaJ18z2EJCuIaiVcySyz7DjVcPTdXQzjkWw8nYPX5IykN
+        zHfHC6qgCcN4AJlgFZl1F9xisXnD+B5X5R4LWwIDAQABAoIBAAQc/g3QG8lemV8m
+        RSQGzWG4ibCkJcnm3ezNg4nXC7dSuTuypCKiqyGQoO0zDunBV6zCWySDieDF6Qe5
+        7/Td8rcyR10KxE7661asHrtQBJ7Did0kpEAeHntwCPeDNZcKIfZDxjAwLvC2ktIT
+        +r/2Ak+GI9leDIVM7W88/IBOw5Ja4POYZUpJ+v6ym3kEA+Xgrw5ej0+pOO2NmTFL
+        pujQd0P1MnK9kaftRPBg9OlFpq0wjViLDPZKcb9XzHBx6LYHqE2IG7P93b8hMNqP
+        A8HAcH8S1h7k3nWT20x/eTVWFTNtGoAsO31nz6QH+E6JbFs6ApNpiON30HkDSFX5
+        wnhbsikCgYEA2gCzC01cJSdzp/yZexelM99ivpwEmytE6R4qBemiNAcRwmKTYSeA
+        ct3AnxPBj1vIaTgwtq9P/JBEPQMonhTWq3bj1v+70HdBz50njd0Rl58zC9rx6nF4
+        2zNOTga3EcmQ2EyeZjxFVSs8v1YtHgT1OUjkcFnS2paBrKkiLhd38WcCgYEAxTsY
+        NkoNTQBitORS5wtp39Dr87k6tyVOmRn8MZuBeaKAJ2cIXFHDwRtNm5so+jQS63td
+        QVOu4wF9fxBPHrxT4z/D9ASfrmsc1Z7gTRGu/sHGYmdDOomAI6RKBBjNtfgBIekW
+        HNrLt+xLXxr8xL7QC8bJtKwPmigWVzo8DWSrme0CgYACrKeFp/lNa2J72Rl47R1V
+        uZPYislzreA2i+wwDmGzCbMqE1ODiZyFzDqkuPVS8OlQgSP32ca9bnen1/YTmmXX
+        zKmW5aRENnJUPbVShDfHCGjz6Ee3fJTi+4omYua0DSj9vlLjJjIjjVg9cK01BRKN
+        FVvYFQIFNHt6xshokFkkWQKBgQCYVS48MDHZuWSDhp4paX1aqwiy8+vPrPbp9VH+
+        FreH9OS6ii/A7j4dljL47nxV04aRbnT2keXP20TMsRILETZRnNyCSlfy5TQeIlnn
+        7LKWfZ/2PP+F5NGdtbSdOXMZCvYE9PxpSOxzoAQO7s8wPph9oAoGi6Z5UGEA+i+L
+        wKdxeQKBgDqFNCOKd50GzA5tavw06AzzsHzYc1PoJBIw3NphYkJimxPbI8RBkkCa
+        HsMd73mr7LrLgzZWj7gBD5GXzBqHDdm+/8u4ev3dhquGeBprFJI8E7K7TEi2Spwz
+        rm8Hl2L077bV+VOTb177RetIFLt/dY8KREWC72vvqxVIzalhjDnG
+        -----END RSA PRIVATE KEY-----
+    ```
+
+- 以下のコマンドを実行
+
+- コマンドを実行する（Concourse CI のWebUIへのログイン）
+
+    ```
+    # fly --target tutorial login --concourse-url http://localhost:8080
+    ```
+
+    - 操作
+    - `http://localhost:8080/login?fly_port=43269` でホストOSのブラウザにアクセスし、表示されたtokenを貼り付ける
+    - ユーザID: `test`、パスワード: `test` とする
+    - 上記操作をすると、Concourse CI のWeb UIにログインできる
+
+        ```
+        logging in to team 'main'
+
+        navigate to the following URL in your browser:
+
+        http://localhost:8080/login?fly_port=43269
+
+        or enter token manually (input hidden): 
+        target saved
+        ```
+
+- パイプラインを削除する
+
+    ```
+    # fly -t tutorial destroy-pipeline -p publishing-outputs
+    ```
+
+- パイプラインを作成
+
+    ```
+    # fly -t tutorial set-pipeline -p publishing-outputs -c pipeline-parameters.yml -l credentials.yml
+    ```
+
+- パイプラインのリソースをチェック
+
+    ```
+    # fly -t tutorial check-resource -r publishing-outputs/resource-gist
+    ```
+
+- パイプラインを有効化
+- ※この手順は、オリジナルにはない
+
+    ```
+    # fly -t tutorial unpause-pipeline -p publishing-outputs
+    ```
+
+- パイプラインを実行し、動作を監視
+
+    ```
+    # fly -t tutorial trigger-job -j publishing-outputs/job-bump-date -w
+    ```
+
+    - 結果
+
+        ```
+        # fly -t tutorial trigger-job -j publishing-outputs/job-bump-date -w
+        started publishing-outputs/job-bump-date #1
+
+        selected worker: 971dfbb64a5a
+        INFO: found existing resource cache
+
+        selected worker: 971dfbb64a5a
+        Identity added: /tmp/git-resource-private-key (/tmp/git-resource-private-key)
+        Cloning into '/tmp/build/get'...
+        45b6011 Bumped date
+        initializing
+        initializing check: image
+        selected worker: 971dfbb64a5a
+        selected worker: 971dfbb64a5a
+        waiting for docker to come up...
+        Pulling getourneau/alpine-bash-git@sha256:246ebea4839401a027da43e406a0ceaf0f763997a516cf85c344425eb913ffe7...
+        docker.io/getourneau/alpine-bash-git@sha256:246ebea4839401a027da43e406a0ceaf0f763997a516cf85c344425eb913ffe7: Pulling from getourneau/alpine-bash-git
+        4fe2ade4980c: Pulling fs layer
+        03c196859ec8: Pulling fs layer
+        720d2de11875: Pulling fs layer
+        4fe2ade4980c: Verifying Checksum
+        4fe2ade4980c: Download complete
+        03c196859ec8: Verifying Checksum
+        03c196859ec8: Download complete
+        4fe2ade4980c: Pull complete
+        03c196859ec8: Pull complete
+        720d2de11875: Verifying Checksum
+        720d2de11875: Download complete
+        720d2de11875: Pull complete
+        Digest: sha256:246ebea4839401a027da43e406a0ceaf0f763997a516cf85c344425eb913ffe7
+        Status: Downloaded newer image for getourneau/alpine-bash-git@sha256:246ebea4839401a027da43e406a0ceaf0f763997a516cf85c344425eb913ffe7
+        docker.io/getourneau/alpine-bash-git@sha256:246ebea4839401a027da43e406a0ceaf0f763997a516cf85c344425eb913ffe7
+
+        Successfully pulled getourneau/alpine-bash-git@sha256:246ebea4839401a027da43e406a0ceaf0f763997a516cf85c344425eb913ffe7.
+
+        selected worker: 971dfbb64a5a
+        running resource-tutorial/tutorials/basic/publishing-outputs/bump-timestamp-file.sh
+        + git clone resource-gist updated-gist
+        Cloning into 'updated-gist'...
+        done.
+        + cd updated-gist
+        + date
+        + echo Sat Sep 2 09:57:59 UTC 2023
+        + git config --global user.email nobody@concourse-ci.org
+        + git config --global user.name Concourse
+        + git add .
+        + git commit -m 'Bumped date'
+        [main 49d182b] Bumped date
+        1 file changed, 1 insertion(+), 1 deletion(-)
+        selected worker: 971dfbb64a5a
+        Identity added: /tmp/git-resource-private-key (/tmp/git-resource-private-key)
+        To gist.github.com:5e40d8df48fa30baf9abee4b35a2241a.git
+        45b6011..49d182b  HEAD -> main
+        selected worker: 971dfbb64a5a
+        Identity added: /tmp/git-resource-private-key (/tmp/git-resource-private-key)
+        Cloning into '/tmp/build/get'...
+        49d182b Bumped date
+        succeeded
+        ```
+
+    - 成功!!
+
+- `credentials.yml`は以下の内容になった
+
+    ```
+    # cat credentials.yml 
+    publishing-outputs-gist-uri: git@gist.github.com:5e40d8df48fa30baf9abee4b35a2241a.git
+    publishing-outputs-private-key: |
+        -----BEGIN RSA PRIVATE KEY-----
+        MIIEowIBAAKCAQEAp/Tcj0IhF9PG27xq6dH4G72Nqns0KjaFnBABLEZty8DtFiaS
+        oESMZgrsrEJe36l1kaE9i/3UWKYrU5LZsDvn8DVc4Y5U0IE/QcmsplH5G0zSA0VJ
+        VRLB4higtJV4JPXKyjS1MBG5pLAD7pUbQ+jBj3a6icsHEuSGAfssY2lpSj8UOUwd
+        fmnPaaXmyY3x1K1KuaggQ8mLOJNPAJ4x2jar+bap0URlggbu2kFQ4/XakDZVCRxT
+        JDybRM37RwrSqLYspnOsaJ18z2EJCuIaiVcySyz7DjVcPTdXQzjkWw8nYPX5IykN
+        zHfHC6qgCcN4AJlgFZl1F9xisXnD+B5X5R4LWwIDAQABAoIBAAQc/g3QG8lemV8m
+        RSQGzWG4ibCkJcnm3ezNg4nXC7dSuTuypCKiqyGQoO0zDunBV6zCWySDieDF6Qe5
+        7/Td8rcyR10KxE7661asHrtQBJ7Did0kpEAeHntwCPeDNZcKIfZDxjAwLvC2ktIT
+        +r/2Ak+GI9leDIVM7W88/IBOw5Ja4POYZUpJ+v6ym3kEA+Xgrw5ej0+pOO2NmTFL
+        pujQd0P1MnK9kaftRPBg9OlFpq0wjViLDPZKcb9XzHBx6LYHqE2IG7P93b8hMNqP
+        A8HAcH8S1h7k3nWT20x/eTVWFTNtGoAsO31nz6QH+E6JbFs6ApNpiON30HkDSFX5
+        wnhbsikCgYEA2gCzC01cJSdzp/yZexelM99ivpwEmytE6R4qBemiNAcRwmKTYSeA
+        ct3AnxPBj1vIaTgwtq9P/JBEPQMonhTWq3bj1v+70HdBz50njd0Rl58zC9rx6nF4
+        2zNOTga3EcmQ2EyeZjxFVSs8v1YtHgT1OUjkcFnS2paBrKkiLhd38WcCgYEAxTsY
+        NkoNTQBitORS5wtp39Dr87k6tyVOmRn8MZuBeaKAJ2cIXFHDwRtNm5so+jQS63td
+        QVOu4wF9fxBPHrxT4z/D9ASfrmsc1Z7gTRGu/sHGYmdDOomAI6RKBBjNtfgBIekW
+        HNrLt+xLXxr8xL7QC8bJtKwPmigWVzo8DWSrme0CgYACrKeFp/lNa2J72Rl47R1V
+        uZPYislzreA2i+wwDmGzCbMqE1ODiZyFzDqkuPVS8OlQgSP32ca9bnen1/YTmmXX
+        zKmW5aRENnJUPbVShDfHCGjz6Ee3fJTi+4omYua0DSj9vlLjJjIjjVg9cK01BRKN
+        FVvYFQIFNHt6xshokFkkWQKBgQCYVS48MDHZuWSDhp4paX1aqwiy8+vPrPbp9VH+
+        FreH9OS6ii/A7j4dljL47nxV04aRbnT2keXP20TMsRILETZRnNyCSlfy5TQeIlnn
+        7LKWfZ/2PP+F5NGdtbSdOXMZCvYE9PxpSOxzoAQO7s8wPph9oAoGi6Z5UGEA+i+L
+        wKdxeQKBgDqFNCOKd50GzA5tavw06AzzsHzYc1PoJBIw3NphYkJimxPbI8RBkkCa
+        HsMd73mr7LrLgzZWj7gBD5GXzBqHDdm+/8u4ev3dhquGeBprFJI8E7K7TEi2Spwz
+        rm8Hl2L077bV+VOTb177RetIFLt/dY8KREWC72vvqxVIzalhjDnG
+        -----END RSA PRIVATE KEY-----
+    ```
+
+- `pipeline-parameters.yml`は以下の内容になった
+
+    ```
+    # cat pipeline-parameters.yml 
+    ---
+    resources:
+    - name: resource-tutorial
+        type: git
+        source:
+        uri: https://github.com/starkandwayne/concourse-tutorial.git
+        branch: develop
+    - name: resource-gist
+        type: git
+        source:
+        # branch: master
+        branch: main
+        uri: ((publishing-outputs-gist-uri))
+        private_key: ((publishing-outputs-private-key))
+
+    jobs:
+    - name: job-bump-date
+        serial: true
+        plan:
+        - get: resource-tutorial
+        - get: resource-gist
+        - task: bump-timestamp-file
+            config:
+            platform: linux
+            image_resource:
+                type: docker-image
+                # source: {repository: starkandwayne/concourse}
+                source: {repository: getourneau/alpine-bash-git}
+
+            inputs:
+                - name: resource-tutorial
+                - name: resource-gist
+            outputs:
+                - name: updated-gist
+            run:
+                path: resource-tutorial/tutorials/basic/publishing-outputs/bump-timestamp-file.sh
+        - put: resource-gist
+            params:
+            repository: updated-gist
+    ```
+
+### 動的パラメータと秘密パラメータ
+
+- 以下のサイトを参考に実施
+
+    https://concoursetutorial-ja.site.lkj.io/basics/parameters#_4
+
+- 以下のコマンドを実行する
+
+
+    ```
+    # fly -t tutorial get-pipeline -p parameters
+    ```
+
+    - 結果
+
+        ```
+        jobs:
+        - name: show-animal-names
+        plan:
+        - config:
+            image_resource:
+                name: ""
+                source:
+                repository: busybox
+                type: docker-image
+            params:
+                CAT_NAME: garfield
+                DOG_NAME: odie
+            platform: linux
+            run:
+                path: env
+            task: show-animal-names
+        ```
+
+    ```
+    # fly -t tutorial get-pipeline -p publishing-outputs
+    ```
+
+    - 結果
+
+        ```
+        # fly -t tutorial get-pipeline -p publishing-outputs
+        jobs:
+        - name: job-bump-date
+        plan:
+        - get: resource-tutorial
+        - get: resource-gist
+        - config:
+            image_resource:
+                name: ""
+                source:
+                repository: getourneau/alpine-bash-git
+                type: docker-image
+            inputs:
+            - name: resource-tutorial
+            - name: resource-gist
+            outputs:
+            - name: updated-gist
+            platform: linux
+            run:
+                path: resource-tutorial/tutorials/basic/publishing-outputs/bump-timestamp-file.sh
+            task: bump-timestamp-file
+        - params:
+            repository: updated-gist
+            put: resource-gist
+        serial: true
+        resources:
+        - name: resource-gist
+        source:
+            branch: main
+            private_key: |
+            -----BEGIN RSA PRIVATE KEY-----
+            MIIEowIBAAKCAQEAp/Tcj0IhF9PG27xq6dH4G72Nqns0KjaFnBABLEZty8DtFiaS
+            oESMZgrsrEJe36l1kaE9i/3UWKYrU5LZsDvn8DVc4Y5U0IE/QcmsplH5G0zSA0VJ
+            VRLB4higtJV4JPXKyjS1MBG5pLAD7pUbQ+jBj3a6icsHEuSGAfssY2lpSj8UOUwd
+            fmnPaaXmyY3x1K1KuaggQ8mLOJNPAJ4x2jar+bap0URlggbu2kFQ4/XakDZVCRxT
+            JDybRM37RwrSqLYspnOsaJ18z2EJCuIaiVcySyz7DjVcPTdXQzjkWw8nYPX5IykN
+            zHfHC6qgCcN4AJlgFZl1F9xisXnD+B5X5R4LWwIDAQABAoIBAAQc/g3QG8lemV8m
+            RSQGzWG4ibCkJcnm3ezNg4nXC7dSuTuypCKiqyGQoO0zDunBV6zCWySDieDF6Qe5
+            7/Td8rcyR10KxE7661asHrtQBJ7Did0kpEAeHntwCPeDNZcKIfZDxjAwLvC2ktIT
+            +r/2Ak+GI9leDIVM7W88/IBOw5Ja4POYZUpJ+v6ym3kEA+Xgrw5ej0+pOO2NmTFL
+            pujQd0P1MnK9kaftRPBg9OlFpq0wjViLDPZKcb9XzHBx6LYHqE2IG7P93b8hMNqP
+            A8HAcH8S1h7k3nWT20x/eTVWFTNtGoAsO31nz6QH+E6JbFs6ApNpiON30HkDSFX5
+            wnhbsikCgYEA2gCzC01cJSdzp/yZexelM99ivpwEmytE6R4qBemiNAcRwmKTYSeA
+            ct3AnxPBj1vIaTgwtq9P/JBEPQMonhTWq3bj1v+70HdBz50njd0Rl58zC9rx6nF4
+            2zNOTga3EcmQ2EyeZjxFVSs8v1YtHgT1OUjkcFnS2paBrKkiLhd38WcCgYEAxTsY
+            NkoNTQBitORS5wtp39Dr87k6tyVOmRn8MZuBeaKAJ2cIXFHDwRtNm5so+jQS63td
+            QVOu4wF9fxBPHrxT4z/D9ASfrmsc1Z7gTRGu/sHGYmdDOomAI6RKBBjNtfgBIekW
+            HNrLt+xLXxr8xL7QC8bJtKwPmigWVzo8DWSrme0CgYACrKeFp/lNa2J72Rl47R1V
+            uZPYislzreA2i+wwDmGzCbMqE1ODiZyFzDqkuPVS8OlQgSP32ca9bnen1/YTmmXX
+            zKmW5aRENnJUPbVShDfHCGjz6Ee3fJTi+4omYua0DSj9vlLjJjIjjVg9cK01BRKN
+            FVvYFQIFNHt6xshokFkkWQKBgQCYVS48MDHZuWSDhp4paX1aqwiy8+vPrPbp9VH+
+            FreH9OS6ii/A7j4dljL47nxV04aRbnT2keXP20TMsRILETZRnNyCSlfy5TQeIlnn
+            7LKWfZ/2PP+F5NGdtbSdOXMZCvYE9PxpSOxzoAQO7s8wPph9oAoGi6Z5UGEA+i+L
+            wKdxeQKBgDqFNCOKd50GzA5tavw06AzzsHzYc1PoJBIw3NphYkJimxPbI8RBkkCa
+            HsMd73mr7LrLgzZWj7gBD5GXzBqHDdm+/8u4ev3dhquGeBprFJI8E7K7TEi2Spwz
+            rm8Hl2L077bV+VOTb177RetIFLt/dY8KREWC72vvqxVIzalhjDnG
+            -----END RSA PRIVATE KEY-----
+            uri: git@gist.github.com:5e40d8df48fa30baf9abee4b35a2241a.git
+        type: git
+        - name: resource-tutorial
+        source:
+            branch: develop
+            uri: https://github.com/starkandwayne/concourse-tutorial.git
+        type: git
+        ```
+
+    - 秘密鍵が見えてしまう
+
+
+### リアルなパイプライン - 複数の Job で Resource を共有する
+
+- 以下のサイトを参考に実施
+
+    https://concoursetutorial-ja.site.lkj.io/basics/pipeline-jobs
+
+
+- 以下のコマンドを実行
+
+    ```
+    # cd /root/concourse-tutorial/tutorials/basic/pipeline-jobs/
+    ```
+
+- `pipeline.yml`を以下のように修正
+
+    ```
+    # cat pipeline.yml
+    ---
+    resources:
+    - name: resource-tutorial
+        type: git
+        source:
+        uri: https://github.com/starkandwayne/concourse-tutorial.git
+        branch: develop
+    - name: resource-gist
+        type: git
+        source:
+        # branch: master
+        branch: main
+        uri: ((publishing-outputs-gist-uri))
+        private_key: ((publishing-outputs-private-key))
+
+    jobs:
+    - name: job-bump-date
+        serial: true
+        plan:
+        - get: resource-tutorial
+        - get: resource-gist
+        - task: bump-timestamp-file
+            config:
+            platform: linux
+            image_resource:
+                type: docker-image
+                # source: {repository: starkandwayne/concourse}
+                source: {repository: getourneau/alpine-bash-git}
+            inputs:
+                - name: resource-tutorial
+                - name: resource-gist
+            outputs:
+                - name: updated-gist
+            run:
+                path: resource-tutorial/tutorials/basic/publishing-outputs/bump-timestamp-file.sh
+        - put: resource-gist
+            params: {repository: updated-gist}
+
+    - name: job-show-date
+        plan:
+        - get: resource-tutorial
+        - get: resource-gist
+            passed: [job-bump-date]
+            trigger: true
+        - task: show-date
+            config:
+            platform: linux
+            image_resource:
+                type: docker-image
+                source: {repository: busybox}
+            inputs:
+                - name: resource-gist
+            run:
+                path: cat
+                args: [resource-gist/bumpme]
+    ```
+
+- 以下のコマンドを実行
+
+
+- コマンドを実行する（Concourse CI のWebUIへのログイン）
+
+    ```
+    # fly --target tutorial login --concourse-url http://localhost:8080
+    ```
+
+    - 操作
+    - `http://localhost:8080/login?fly_port=43269` でホストOSのブラウザにアクセスし、表示されたtokenを貼り付ける
+    - ユーザID: `test`、パスワード: `test` とする
+    - 上記操作をすると、Concourse CI のWeb UIにログインできる
+
+        ```
+        logging in to team 'main'
+
+        navigate to the following URL in your browser:
+
+        http://localhost:8080/login?fly_port=43269
+
+        or enter token manually (input hidden): 
+        target saved
+        ```
+
+- パイプラインを削除する
+
+    ```
+    # fly -t tutorial destroy-pipeline -p publishing-outputs
+    ```
+
+- パイプラインを作成
+
+    ```
+    # fly -t tutorial set-pipeline -p publishing-outputs -c pipeline.yml -l ../publishing-outputs/credentials.yml
+    ```
+
+- パイプラインのリソースをチェック
+
+    ```
+    # fly -t tutorial check-resource -r publishing-outputs/resource-gist
+    ```
+
+    - 結果
+
+        ```
+        checking publishing-outputs/resource-gist in build 2395
+        initializing check: resource-gist
+        selected worker: 971dfbb64a5a
+        Identity added: /tmp/git-resource-private-key (/tmp/git-resource-private-key)
+        Cloning into '/tmp/git-resource-repo-cache'...
+        succeeded
+        ```
+
+- パイプラインを有効化
+- ※この手順は、オリジナルにはない
+
+    ```
+    # fly -t tutorial unpause-pipeline -p publishing-outputs
+    ```
+
+    - 結果
+
+        ```
+        unpaused 'publishing-outputs'
+        ```
+
+
+- パイプラインを実行し、動作を監視（job-bump-dateを実行し、監視）
+
+    ```
+    # fly -t tutorial trigger-job -j publishing-outputs/job-bump-date -w
+    ```
+
+    - 結果
+
+        ```
+        started publishing-outputs/job-bump-date #1
+
+        selected worker: 971dfbb64a5a
+        INFO: found existing resource cache
+
+        selected worker: 971dfbb64a5a
+        Identity added: /tmp/git-resource-private-key (/tmp/git-resource-private-key)
+        Cloning into '/tmp/build/get'...
+        49d182b Bumped date
+        initializing
+        initializing check: image
+        selected worker: 971dfbb64a5a
+        selected worker: 971dfbb64a5a
+        waiting for docker to come up...
+        Pulling getourneau/alpine-bash-git@sha256:246ebea4839401a027da43e406a0ceaf0f763997a516cf85c344425eb913ffe7...
+        docker.io/getourneau/alpine-bash-git@sha256:246ebea4839401a027da43e406a0ceaf0f763997a516cf85c344425eb913ffe7: Pulling from getourneau/alpine-bash-git
+        4fe2ade4980c: Pulling fs layer
+        03c196859ec8: Pulling fs layer
+        720d2de11875: Pulling fs layer
+        720d2de11875: Verifying Checksum
+        720d2de11875: Download complete
+        4fe2ade4980c: Verifying Checksum
+        4fe2ade4980c: Download complete
+        03c196859ec8: Verifying Checksum
+        03c196859ec8: Download complete
+        4fe2ade4980c: Pull complete
+        03c196859ec8: Pull complete
+        720d2de11875: Pull complete
+        Digest: sha256:246ebea4839401a027da43e406a0ceaf0f763997a516cf85c344425eb913ffe7
+        Status: Downloaded newer image for getourneau/alpine-bash-git@sha256:246ebea4839401a027da43e406a0ceaf0f763997a516cf85c344425eb913ffe7
+        docker.io/getourneau/alpine-bash-git@sha256:246ebea4839401a027da43e406a0ceaf0f763997a516cf85c344425eb913ffe7
+
+        Successfully pulled getourneau/alpine-bash-git@sha256:246ebea4839401a027da43e406a0ceaf0f763997a516cf85c344425eb913ffe7.
+
+        selected worker: 971dfbb64a5a
+        running resource-tutorial/tutorials/basic/publishing-outputs/bump-timestamp-file.sh
+        + git clone resource-gist updated-gist
+        Cloning into 'updated-gist'...
+        done.
+        + cd updated-gist
+        + date
+        + echo Sat Sep 2 11:15:43 UTC 2023
+        + git config --global user.email nobody@concourse-ci.org
+        + git config --global user.name Concourse
+        + git add .
+        + git commit -m 'Bumped date'
+        [main 39f8a85] Bumped date
+        1 file changed, 1 insertion(+), 1 deletion(-)
+        selected worker: 971dfbb64a5a
+        Identity added: /tmp/git-resource-private-key (/tmp/git-resource-private-key)
+        To gist.github.com:5e40d8df48fa30baf9abee4b35a2241a.git
+        49d182b..39f8a85  HEAD -> main
+        selected worker: 971dfbb64a5a
+        Identity added: /tmp/git-resource-private-key (/tmp/git-resource-private-key)
+        Cloning into '/tmp/build/get'...
+        39f8a85 Bumped date
+        succeeded
+        ```
+
+- 以下のコマンドを実行(job-show-dateの結果を確認)
+
+    ```
+    # fly -t tutorial watch -j publishing-outputs/job-show-date
+    ```
+
+    - 結果
+
+        ```
+        selected worker: 971dfbb64a5a
+        INFO: found existing resource cache
+
+        selected worker: 971dfbb64a5a
+        INFO: found existing resource cache
+
+        initializing
+        initializing check: image
+        selected worker: 971dfbb64a5a
+        selected worker: 971dfbb64a5a
+        INFO: found existing resource cache
+
+        selected worker: 971dfbb64a5a
+        running cat resource-gist/bumpme
+        Sat Sep 2 11:15:43 UTC 2023
+        succeeded
+        ```
+
