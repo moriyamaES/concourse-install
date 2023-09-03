@@ -3727,3 +3727,304 @@ docker-compose は 2023-08-15現在の最新のため、このままとする
         succeeded
         ```
 
+### 秘密パラメータを資格情報マネージャで管理する
+
+- 以下のサイト
+    https://concoursetutorial-ja.site.lkj.io/basics/secret-parameters
+
+- 資格情報マネージャは、Vault を使用するので、ここはとりあえず飛ばし
+
+
+### Miscellaneous（その他）
+
+- 以下のサイト
+
+    https://concoursetutorial-ja.site.lkj.io/miscellaneous/
+
+- 秘密パラメータを資格情報マネージャで管理するの`bucc`は実行していない。
+- このため、 レッスンには、`fly -t bucc` コマンドでなく、`fly -t tutorial`コマンドを使用
+- パラメータの渡しは、`-v` または `-l` フラグで `fly set-pipeline`` を使ってコマンドラインを使用
+
+
+### デプロイの前にテストを実行する
+
+- 以下のサイト
+
+    https://concoursetutorial-ja.site.lkj.io/miscellaneous/run-tests-before-deploy
+
+- Cloud Foundry のアカウントを作成したいないため、飛ばし
+
+### Docker イメージの作成・利用
+
+- 以下のサイトを参考にして実行
+
+    https://concoursetutorial-ja.site.lkj.io/miscellaneous/docker-images
+
+
+- credentials.yml の更新
+
+- 以下のコマンドを実行し、`credentials.yml` の更新内容を確認
+
+    ```
+    # cd ~/concourse-install/
+    ```
+
+    ```
+    # cat credentials.yml 
+    publishing-outputs-gist-uri: git@gist.github.com:5e40d8df48fa30baf9abee4b35a2241a.git
+    publishing-outputs-private-key: |
+        -----BEGIN RSA PRIVATE KEY-----
+        MIIEowIBAAKCAQEAp/Tcj0IhF9PG27xq6dH4G72Nqns0KjaFnBABLEZty8DtFiaS
+        oESMZgrsrEJe36l1kaE9i/3UWKYrU5LZsDvn8DVc4Y5U0IE/QcmsplH5G0zSA0VJ
+        VRLB4higtJV4JPXKyjS1MBG5pLAD7pUbQ+jBj3a6icsHEuSGAfssY2lpSj8UOUwd
+        fmnPaaXmyY3x1K1KuaggQ8mLOJNPAJ4x2jar+bap0URlggbu2kFQ4/XakDZVCRxT
+        JDybRM37RwrSqLYspnOsaJ18z2EJCuIaiVcySyz7DjVcPTdXQzjkWw8nYPX5IykN
+        zHfHC6qgCcN4AJlgFZl1F9xisXnD+B5X5R4LWwIDAQABAoIBAAQc/g3QG8lemV8m
+        RSQGzWG4ibCkJcnm3ezNg4nXC7dSuTuypCKiqyGQoO0zDunBV6zCWySDieDF6Qe5
+        7/Td8rcyR10KxE7661asHrtQBJ7Did0kpEAeHntwCPeDNZcKIfZDxjAwLvC2ktIT
+        +r/2Ak+GI9leDIVM7W88/IBOw5Ja4POYZUpJ+v6ym3kEA+Xgrw5ej0+pOO2NmTFL
+        pujQd0P1MnK9kaftRPBg9OlFpq0wjViLDPZKcb9XzHBx6LYHqE2IG7P93b8hMNqP
+        A8HAcH8S1h7k3nWT20x/eTVWFTNtGoAsO31nz6QH+E6JbFs6ApNpiON30HkDSFX5
+        wnhbsikCgYEA2gCzC01cJSdzp/yZexelM99ivpwEmytE6R4qBemiNAcRwmKTYSeA
+        ct3AnxPBj1vIaTgwtq9P/JBEPQMonhTWq3bj1v+70HdBz50njd0Rl58zC9rx6nF4
+        2zNOTga3EcmQ2EyeZjxFVSs8v1YtHgT1OUjkcFnS2paBrKkiLhd38WcCgYEAxTsY
+        NkoNTQBitORS5wtp39Dr87k6tyVOmRn8MZuBeaKAJ2cIXFHDwRtNm5so+jQS63td
+        QVOu4wF9fxBPHrxT4z/D9ASfrmsc1Z7gTRGu/sHGYmdDOomAI6RKBBjNtfgBIekW
+        HNrLt+xLXxr8xL7QC8bJtKwPmigWVzo8DWSrme0CgYACrKeFp/lNa2J72Rl47R1V
+        uZPYislzreA2i+wwDmGzCbMqE1ODiZyFzDqkuPVS8OlQgSP32ca9bnen1/YTmmXX
+        zKmW5aRENnJUPbVShDfHCGjz6Ee3fJTi+4omYua0DSj9vlLjJjIjjVg9cK01BRKN
+        FVvYFQIFNHt6xshokFkkWQKBgQCYVS48MDHZuWSDhp4paX1aqwiy8+vPrPbp9VH+
+        FreH9OS6ii/A7j4dljL47nxV04aRbnT2keXP20TMsRILETZRnNyCSlfy5TQeIlnn
+        7LKWfZ/2PP+F5NGdtbSdOXMZCvYE9PxpSOxzoAQO7s8wPph9oAoGi6Z5UGEA+i+L
+        wKdxeQKBgDqFNCOKd50GzA5tavw06AzzsHzYc1PoJBIw3NphYkJimxPbI8RBkkCa
+        HsMd73mr7LrLgzZWj7gBD5GXzBqHDdm+/8u4ev3dhquGeBprFJI8E7K7TEi2Spwz
+        rm8Hl2L077bV+VOTb177RetIFLt/dY8KREWC72vvqxVIzalhjDnG
+        -----END RSA PRIVATE KEY-----
+
+    docker-hub-email: moriyama.kazuhiro@earthsys-lab.co.jp
+    docker-hub-username: kuzumusen
+    docker-hub-password: z@yaNa053
+    ```
+
+- 以下のコマンドを実行し、`pipeline.yml`の内容を確認
+
+    ```
+    # cd ~/concourse-tutorial/tutorials/miscellaneous/docker-images/
+    ```
+
+    ```
+    # cat pipeline.yml 
+    ---
+    resources:
+    - name: tutorial
+        type: git
+        source:
+        uri: https://github.com/drnic/concourse-tutorial.git
+        branch: develop
+
+    - name: hello-world-docker-image
+        type: docker-image
+        source:
+        email: ((docker-hub-email))
+        username: ((docker-hub-username))
+        password: ((docker-hub-password))
+        repository: ((docker-hub-username))/concourse-tutorial-hello-world
+
+    jobs:
+    - name: publish
+        public: true
+        plan:
+        - get: tutorial
+        - put: hello-world-docker-image
+            params:
+            build: tutorial/tutorials/miscellaneous/docker-images/docker
+        - task: run
+            config:
+            platform: linux
+            image_resource:
+                type: docker-image
+                source:
+                repository: ((docker-hub-username))/concourse-tutorial-hello-world
+            run:
+                path: /bin/hello-world
+                args: []
+            params:
+                NAME: ((docker-hub-username))
+    ```
+
+- コマンドを実行する（Concourse CI のWebUIへのログイン）
+
+    ```
+    # fly --target tutorial login --concourse-url http://localhost:8080
+    ```
+
+    - 操作
+    - `http://localhost:8080/login?fly_port=43269` でホストOSのブラウザにアクセスし、表示されたtokenを貼り付ける
+    - ユーザID: `test`、パスワード: `test` とする
+    - 上記操作をすると、Concourse CI のWeb UIにログインできる
+
+        ```
+        logging in to team 'main'
+
+        navigate to the following URL in your browser:
+
+        http://localhost:8080/login?fly_port=43269
+
+        or enter token manually (input hidden): 
+        target saved
+        ```
+
+- パイプラインを削除する
+
+    ```
+    # fly -t tutorial destroy-pipeline -p push-docker-image
+    ```
+
+-　以下のコマンドを実行
+
+    ```
+    # fly -t tutorial set-pipeline -p push-docker-image -c pipeline.yml -n -l ~/concourse-install/credentials.yml
+    ```
+
+    - ※補足
+
+        ```
+        -n オプションを付けると、`apply configuration? [yN]: y` といった問合せがなくなる
+
+        ＜ChatGPTより＞
+        Concourse CI/CDのfly set-pipelineコマンドにおいて、-nオプションは "non-interactive" モードを意味します。このオプションを使用することで、対話的なプロンプトなしでパイプラインを設定することができます。
+
+        通常、fly set-pipelineコマンドは対話モードで動作し、設定情報をユーザーに対話的に尋ねます。しかし、-nオプションを指定することで、コマンドの実行中にユーザーからの入力を待たずに、事前に指定した設定ファイル (-c pipeline.yml で指定されたファイル) を使用してパイプラインを設定します。
+
+        このように、-nオプションを使うことで、自動化されたスクリプトやバッチジョブなどでConcourseパイプラインを設定する際に役立ちます。
+        ```
+
+    - 問合せが必要ならば、以下のコマンドとすつ
+
+        ```
+        # fly -t tutorial set-pipeline -p push-docker-image -c pipeline.yml -l ~/concourse-install/credentials.yml
+        ```
+
+- パイプラインのリソースをチェック
+
+    ```
+    # fly -t tutorial check-resource -r publishing-outputs/resource-gist
+    ```
+
+    - 結果
+
+        ```
+        # fly -t tutorial check-resource -r publishing-outputs/resource-gist
+        checking publishing-outputs/resource-gist in build 4403
+        initializing check: resource-gist
+        selected worker: 971dfbb64a5a
+        Identity added: /tmp/git-resource-private-key (/tmp/git-resource-private-key)
+        HEAD is now at 39f8a85 Bumped date
+        succeeded
+        ```
+
+    ```
+    # fly -t tutorial unpause-pipeline -p push-docker-image
+    ```
+
+    ```
+    # fly -t tutorial trigger-job -j push-docker-image/publish -w
+    ```
+
+    - 結果
+
+        ```
+        started push-docker-image/publish #1
+
+        selected worker: 971dfbb64a5a
+        Cloning into '/tmp/build/get'...
+        a3edcb3 restrict mkdocs packages until can make time to upgrade https://ci2.starkandwayne.com/teams/starkandwayne/pipelines/concourse-tutorial/jobs/website-master/builds/32
+        selected worker: 971dfbb64a5a
+        waiting for docker to come up...
+        WARNING! Your password will be stored unencrypted in /root/.docker/config.json.
+        Configure a credential helper to remove this warning. See
+        https://docs.docker.com/engine/reference/commandline/login/#credentials-store
+
+        Login Succeeded
+        DEPRECATED: The legacy builder is deprecated and will be removed in a future release.
+                    BuildKit is currently disabled; enable it by removing the DOCKER_BUILDKIT=0
+                    environment-variable.
+
+        Sending build context to Docker daemon  3.072kB
+        Step 1/4 : FROM busybox
+        latest: Pulling from library/busybox
+        3f4d90098f5b: Pulling fs layer
+        3f4d90098f5b: Verifying Checksum
+        3f4d90098f5b: Download complete
+        3f4d90098f5b: Pull complete
+        Digest: sha256:3fbc632167424a6d997e74f52b878d7cc478225cffac6bc977eedfe51c7f4e79
+        Status: Downloaded newer image for busybox:latest
+        ---> a416a98b71e2
+        Step 2/4 : ADD hello-world /bin/hello-world
+        ---> 9275d00a40f1
+        Step 3/4 : ENV NAME=world
+        ---> Running in e574eb8d20ac
+        Removing intermediate container e574eb8d20ac
+        ---> 6df0b0183dfb
+        Step 4/4 : ENTRYPOINT ["/bin/hello-world"]
+        ---> Running in f0ae48c1e62c
+        Removing intermediate container f0ae48c1e62c
+        ---> 09a86b0b13ee
+        Successfully built 09a86b0b13ee
+        Successfully tagged kuzumusen/concourse-tutorial-hello-world:latest
+        The push refers to repository [docker.io/kuzumusen/concourse-tutorial-hello-world]
+        4ed197c16584: Preparing
+        3d24ee258efc: Preparing
+        3d24ee258efc: Mounted from library/busybox
+        4ed197c16584: Pushed
+        latest: digest: sha256:727b34b02e7f858aa93d9efc21eff99da0d9cabcd4fbd1885e78a0065bf8beb5 size: 735
+        selected worker: 971dfbb64a5a
+        waiting for docker to come up...
+        WARNING! Your password will be stored unencrypted in /root/.docker/config.json.
+        Configure a credential helper to remove this warning. See
+        https://docs.docker.com/engine/reference/commandline/login/#credentials-store
+
+        Login Succeeded
+        Pulling kuzumusen/concourse-tutorial-hello-world@sha256:727b34b02e7f858aa93d9efc21eff99da0d9cabcd4fbd1885e78a0065bf8beb5...
+        docker.io/kuzumusen/concourse-tutorial-hello-world@sha256:727b34b02e7f858aa93d9efc21eff99da0d9cabcd4fbd1885e78a0065bf8beb5: Pulling from kuzumusen/concourse-tutorial-hello-world
+        3f4d90098f5b: Pulling fs layer
+        20b2426c6bbd: Pulling fs layer
+        20b2426c6bbd: Verifying Checksum
+        20b2426c6bbd: Download complete
+        3f4d90098f5b: Verifying Checksum
+        3f4d90098f5b: Download complete
+        3f4d90098f5b: Pull complete
+        20b2426c6bbd: Pull complete
+        Digest: sha256:727b34b02e7f858aa93d9efc21eff99da0d9cabcd4fbd1885e78a0065bf8beb5
+        Status: Downloaded newer image for kuzumusen/concourse-tutorial-hello-world@sha256:727b34b02e7f858aa93d9efc21eff99da0d9cabcd4fbd1885e78a0065bf8beb5
+        docker.io/kuzumusen/concourse-tutorial-hello-world@sha256:727b34b02e7f858aa93d9efc21eff99da0d9cabcd4fbd1885e78a0065bf8beb5
+
+        Successfully pulled kuzumusen/concourse-tutorial-hello-world@sha256:727b34b02e7f858aa93d9efc21eff99da0d9cabcd4fbd1885e78a0065bf8beb5.
+
+        initializing
+        initializing check: image
+        selected worker: 971dfbb64a5a
+        selected worker: 971dfbb64a5a
+        waiting for docker to come up...
+        Pulling kuzumusen/concourse-tutorial-hello-world@sha256:727b34b02e7f858aa93d9efc21eff99da0d9cabcd4fbd1885e78a0065bf8beb5...
+        docker.io/kuzumusen/concourse-tutorial-hello-world@sha256:727b34b02e7f858aa93d9efc21eff99da0d9cabcd4fbd1885e78a0065bf8beb5: Pulling from kuzumusen/concourse-tutorial-hello-world
+        3f4d90098f5b: Pulling fs layer
+        20b2426c6bbd: Pulling fs layer
+        3f4d90098f5b: Verifying Checksum
+        3f4d90098f5b: Download complete
+        20b2426c6bbd: Verifying Checksum
+        20b2426c6bbd: Download complete
+        3f4d90098f5b: Pull complete
+        20b2426c6bbd: Pull complete
+        Digest: sha256:727b34b02e7f858aa93d9efc21eff99da0d9cabcd4fbd1885e78a0065bf8beb5
+        Status: Downloaded newer image for kuzumusen/concourse-tutorial-hello-world@sha256:727b34b02e7f858aa93d9efc21eff99da0d9cabcd4fbd1885e78a0065bf8beb5
+        docker.io/kuzumusen/concourse-tutorial-hello-world@sha256:727b34b02e7f858aa93d9efc21eff99da0d9cabcd4fbd1885e78a0065bf8beb5
+
+        Successfully pulled kuzumusen/concourse-tutorial-hello-world@sha256:727b34b02e7f858aa93d9efc21eff99da0d9cabcd4fbd1885e78a0065bf8beb5.
+
+        selected worker: 971dfbb64a5a
+        running /bin/hello-world
+        hello kuzumusen
+        succeeded
+        ```
+
