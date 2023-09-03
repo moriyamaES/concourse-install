@@ -4091,7 +4091,7 @@ docker-compose は 2023-08-15現在の最新のため、このままとする
 - パイプラインのリソースをチェック
 
     ```
-    # fly -t tutorial check-resource -r github-release-input/resource-gist
+    # fly -t tutorial check-resource -r github-release-input/github-release-shield
     ```
 
     - 結果
@@ -4100,11 +4100,64 @@ docker-compose は 2023-08-15現在の最新のため、このままとする
         ```
 
     ```
-    # fly -t tutorial unpause-pipeline -p push-docker-image
+    # fly -t tutorial unpause-pipeline -p github-release-input
     ```
 
     ```
-    # fly -t tutorial trigger-job -j push-docker-image/publish -w
+    # fly -t tutorial trigger-job -j github-release-input/shield -w
     ```
 
     - 結果
+
+        ```
+        started github-release-input/shield #1
+
+        selected worker: 971dfbb64a5a
+        downloading asset: shield-darwin-amd64
+        downloading asset: shield-darwin-arm64
+        downloading asset: shield-linux-amd64
+        downloading asset: shield-server-linux-amd64.tar.gz
+        initializing
+        initializing check: image
+        selected worker: 971dfbb64a5a
+        selected worker: 971dfbb64a5a
+        waiting for docker to come up...
+        Pulling ubuntu@sha256:aabed3296a3d45cede1dc866a24476c4d7e093aa806263c27ddaadbdce3c1054...
+        docker.io/library/ubuntu@sha256:aabed3296a3d45cede1dc866a24476c4d7e093aa806263c27ddaadbdce3c1054: Pulling from library/ubuntu
+        445a6a12be2b: Pulling fs layer
+        445a6a12be2b: Verifying Checksum
+        445a6a12be2b: Download complete
+        445a6a12be2b: Pull complete
+        Digest: sha256:aabed3296a3d45cede1dc866a24476c4d7e093aa806263c27ddaadbdce3c1054
+        Status: Downloaded newer image for ubuntu@sha256:aabed3296a3d45cede1dc866a24476c4d7e093aa806263c27ddaadbdce3c1054
+        docker.io/library/ubuntu@sha256:aabed3296a3d45cede1dc866a24476c4d7e093aa806263c27ddaadbdce3c1054
+
+        Successfully pulled ubuntu@sha256:aabed3296a3d45cede1dc866a24476c4d7e093aa806263c27ddaadbdce3c1054.
+
+        selected worker: 971dfbb64a5a
+        running ls -opR .
+        .:
+        total 0
+        drwxr-xr-x. 1 root 6 Sep  3 06:49 github-release-shield/
+
+        ./github-release-shield:
+        total 155276
+        -rw-r--r--. 1 root       613 Sep  3 06:47 body
+        -rw-r--r--. 1 root        40 Sep  3 06:47 commit_sha
+        -rw-r--r--. 1 root   8842352 Sep  3 06:48 shield-darwin-amd64
+        -rw-r--r--. 1 root   8601890 Sep  3 06:48 shield-darwin-arm64
+        -rw-r--r--. 1 root   9013177 Sep  3 06:48 shield-linux-amd64
+        -rw-r--r--. 1 root 132510067 Sep  3 06:49 shield-server-linux-amd64.tar.gz
+        -rw-r--r--. 1 root         6 Sep  3 06:47 tag
+        -rw-r--r--. 1 root        20 Sep  3 06:47 timestamp
+        -rw-r--r--. 1 root        59 Sep  3 06:47 url
+        -rw-r--r--. 1 root         5 Sep  3 06:47 version
+        initializing
+        initializing check: image
+        selected worker: 971dfbb64a5a
+        INFO: found existing resource cache
+
+        selected worker: 971dfbb64a5a
+        running cat github-release-shield/version
+        8.8.6succeeded
+        ```
