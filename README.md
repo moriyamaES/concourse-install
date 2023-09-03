@@ -3752,7 +3752,7 @@ docker-compose は 2023-08-15現在の最新のため、このままとする
 
     https://concoursetutorial-ja.site.lkj.io/miscellaneous/run-tests-before-deploy
 
-- Cloud Foundry のアカウントを作成したいないため、飛ばし
+- 2023-09-03、 Cloud Foundry のアカウントを作成したいないため、飛ばし
 
 ### Docker イメージの作成・利用
 
@@ -3899,11 +3899,13 @@ docker-compose は 2023-08-15現在の最新のため、このままとする
         このように、-nオプションを使うことで、自動化されたスクリプトやバッチジョブなどでConcourseパイプラインを設定する際に役立ちます。
         ```
 
-    - 問合せが必要ならば、以下のコマンドとすつ
+    - 問合せが必要ならば、以下のコマンドとする
 
         ```
         # fly -t tutorial set-pipeline -p push-docker-image -c pipeline.yml -l ~/concourse-install/credentials.yml
         ```
+
+<del>
 
 - パイプラインのリソースをチェック
 
@@ -3922,6 +3924,8 @@ docker-compose は 2023-08-15現在の最新のため、このままとする
         HEAD is now at 39f8a85 Bumped date
         succeeded
         ```
+
+</del>
 
     ```
     # fly -t tutorial unpause-pipeline -p push-docker-image
@@ -4028,3 +4032,79 @@ docker-compose は 2023-08-15現在の最新のため、このままとする
         succeeded
         ```
 
+### バージョニングとビルド番号
+
+- 以下のサイトが参考
+
+    https://concoursetutorial-ja.site.lkj.io/miscellaneous/versions-and-buildnumbers
+
+- 2023-09-03、AWSのアカウントがまだないこと、資格情報マネージャ（Credhub）を使用していないことから、飛ばし
+
+
+### Github Release を input にする
+
+- 以下のサイトを参考にしている
+
+    https://concoursetutorial-ja.site.lkj.io/miscellaneous/github-release-input#github-release-input
+
+
+- 以下のコマンドを実行
+
+    ```
+    # cd ~/concourse-tutorial/tutorials/miscellaneous/github-release-input/
+    ```
+
+- コマンドを実行する（Concourse CI のWebUIへのログイン）
+
+    ```
+    # fly --target tutorial login --concourse-url http://localhost:8080
+    ```
+
+    - 操作
+    - `http://localhost:8080/login?fly_port=43269` でホストOSのブラウザにアクセスし、表示されたtokenを貼り付ける
+    - ユーザID: `test`、パスワード: `test` とする
+    - 上記操作をすると、Concourse CI のWeb UIにログインできる
+
+        ```
+        logging in to team 'main'
+
+        navigate to the following URL in your browser:
+
+        http://localhost:8080/login?fly_port=43269
+
+        or enter token manually (input hidden): 
+        target saved
+        ```
+
+- パイプラインを削除する
+
+    ```
+    # fly -t tutorial destroy-pipeline -p github-release-input -n
+    ```
+
+-　以下のコマンドを実行
+
+    ```
+    # fly -t tutorial set-pipeline -p github-release-input -c pipeline.yml -n 
+    ```
+
+- パイプラインのリソースをチェック
+
+    ```
+    # fly -t tutorial check-resource -r github-release-input/resource-gist
+    ```
+
+    - 結果
+
+        ```
+        ```
+
+    ```
+    # fly -t tutorial unpause-pipeline -p push-docker-image
+    ```
+
+    ```
+    # fly -t tutorial trigger-job -j push-docker-image/publish -w
+    ```
+
+    - 結果
