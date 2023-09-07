@@ -29,7 +29,8 @@ services:
       CONCOURSE_ADD_LOCAL_USER: test:test
       CONCOURSE_MAIN_TEAM_LOCAL_USER: test
       CONCOURSE_VAULT_URL: http://127.0.0.1:8200
-      CONCOURSE_VAULT_CLIENT_TOKEN: hvs.CAESII7rrevJiuWGuxuBao28rbs1OnmdLUMV2g05hdXd84uQGh4KHGh2cy5oeGwxeEZoUDFqUVBYU2JsMTRoc3pxSFg
+      CONCOURSE_VAULT_CLIENT_TOKEN: hvs.CAESIPq9lJYziFyyw5_BdaaV8SqjKVkpTQwbsCxR9ZsXZPb_Gh4KHGh2cy5OZUJVS2JhTHZUaEZmYWw5VUlRMEdhTjg
+
     logging:
       driver: "json-file"
       options:
