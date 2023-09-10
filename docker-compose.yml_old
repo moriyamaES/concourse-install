@@ -29,8 +29,7 @@ services:
       CONCOURSE_ADD_LOCAL_USER: test:test
       CONCOURSE_MAIN_TEAM_LOCAL_USER: test
       CONCOURSE_VAULT_URL: http://10.1.1.200:8200
-      CONCOURSE_VAULT_AUTH_BACKEND: "approle"
-      CONCOURSE_VAULT_AUTH_PARAM: "role_id:2bf6997c-c123-5e25-3e22-ebe3c539ff16,secret_id:f9189289-baf8-368f-088a-c8c14bd484ea"
+      CONCOURSE_VAULT_CLIENT_TOKEN: hvs.CAESIC9wzsgw0a0W6cq1LG1UcqofJAcSxgzFEMrBnDTyECs8Gh4KHGh2cy5UQUZ2NHVINm1wb2pLNWRVSWNrQzNXUG8
 
     logging:
       driver: "json-file"
