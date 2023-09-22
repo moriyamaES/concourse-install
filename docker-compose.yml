@@ -30,7 +30,7 @@ services:
       CONCOURSE_MAIN_TEAM_LOCAL_USER: test
       CONCOURSE_VAULT_URL: http://10.1.1.200:8200
       CONCOURSE_VAULT_AUTH_BACKEND: "approle"
-      CONCOURSE_VAULT_AUTH_PARAM: "role_id:2bf6997c-c123-5e25-3e22-ebe3c539ff16,secret_id:18cbe4e2-27da-bb78-18d2-9b0cd47f8f6c"
+      CONCOURSE_VAULT_AUTH_PARAM: "role_id:2bf6997c-c123-5e25-3e22-ebe3c539ff16,secret_id:9edfc1bf-bc60-fb8a-75b5-454ba3a47a95"
 
     logging:
       driver: "json-file"
